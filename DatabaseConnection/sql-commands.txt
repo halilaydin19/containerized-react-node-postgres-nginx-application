@@ -1,0 +1,9 @@
+psql -h localhost -p 5432 -U admin -d dbName
+\l (list of all databases)
+\dt (list of tables in the database)
+\d users (describe the table)
+alter table users alter column username set not null; (set not null all fields)
+INSERT INTO users (username, user_last_name) VALUES ('John', 'Doe'); (sample addition to database)
+
+
+

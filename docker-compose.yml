@@ -1,0 +1,90 @@
+services:
+  form:
+    build:
+      context: ./form
+      dockerfile: ./dockerfile
+    container_name: form-frontend
+    restart: always
+    working_dir: /usr/src/app
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    volumes: 
+      - ./form:/usr/src/app
+      - /usr/src/app/node_modules
+    tty: true
+    command: npm start
+    depends_on:
+      - backend
+  list:
+    build:
+      context: ./list
+      dockerfile: ./dockerfile
+    container_name: list-frontend
+    restart: always
+    working_dir: /usr/src/app
+    ports:
+      - "3001:3000"
+    networks:
+      - app-network
+    volumes: 
+      - ./list:/usr/src/app
+      - /usr/src/app/node_modules
+
+    tty: true
+    command: npm start
+    depends_on:
+      - backend
+  
+  backend:
+    build:
+      context: ./server
+      dockerfile: ./dockerfile
+    container_name: backend
+    restart: always
+    working_dir: /usr/src/app
+    ports:
+      - 5001:5001
+    volumes:
+      - ./server:/usr/src/app
+      - /usr/src/app/node_modules
+
+    tty: true
+    command: npm run dev
+    networks:
+      - app-network
+    depends_on:
+      - postgres
+
+  postgres:
+    build:
+      context: ./DatabaseConnection
+      dockerfile: ./dockerfile
+    restart: always
+    networks:
+      - app-network
+    tty: true
+    ports:
+      - 5432:5432
+    volumes:
+      -  ./DatabaseConnection/pgdata:/var/lib/postgresql/data
+    
+  nginx:
+    build: 
+      context: ./nginx
+      dockerfile: ./dockerfile
+    restart: always
+    tty: true
+    ports:
+      - 8000:80
+      - 8001:81
+    networks:
+      - app-network
+    depends_on:
+      - form
+      - backend
+      - list
+networks:
+  app-network:
+    driver: bridge
